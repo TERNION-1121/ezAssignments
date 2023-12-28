@@ -1,0 +1,18 @@
+1. MCQ
+<question>
+<opt A>
+<opt B>
+<opt C>
+<opt D>
+
+2. AR     
+A: <assertion> 
+<assertion_line_2>
+R: <reason> 
+<reason_line_2>
+
+3. OBJ
+<question>
+
+4. SUB
+<question>

@@ -9,28 +9,35 @@ class Assignment:
         file.close()
 
         contents = Utilities.split_list(contents, '\n')
-        
+
         self.MCQS = []
         self.ARS  = []
         self.OBJS = []
         self.SUBS = []
 
         for question in contents:
-        
-            num, question_type = question[0].split('.') 
-            num = int(num)
-            question_type = question_type.strip()
+            self.validQuestion(question)
 
-            match question_type:
-                case "MCQ":
-                    self.MCQS.append(MCQ(question[1], question[2:6], num))
-                case "AR":
-                    # find index of element starting with "R:"
-                    for i in range(len(question)):
-                        if question[i].startswith('R:'):
-                            self.ARS.append(AR(question[1:i], question[i:], num))
-                            break
-                case "OBJ":
-                    self.OBJS.append(OBJ(question[1:], num)) 
-                case "SUB":
-                    self.SUBS.append(SUB(question[1:], num))
+        self.MCQS = filter(lambda x: x, self.MCQS)
+        self.ARS  = filter(lambda x: x, self.ARS)
+        self.OBJS = filter(lambda x: x, self.OBJS)
+        self.SUBS = filter(lambda x: x, self.SUBS)
+    
+       
+    def validQuestion(self, question_content: list[str]):
+        num, question_type = map(str.strip, question_content[0].split('.'))
+    
+        try:
+            num = int(num)
+        except:
+            return 
+        
+        match question_type:
+            case 'MCQ':
+                self.MCQS.append(MCQ.fromList(num, question_content[1:]))
+            case 'AR':
+                self.ARS.append(AR.fromList(num, question_content[1:]))
+            case 'OBJ':
+                self.OBJS.append(OBJ.fromList(num, question_content[1:]))
+            case 'SUB':
+                self.SUBS.append(SUB.fromList(num, question_content[1:]))

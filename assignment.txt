@@ -1,20 +1,21 @@
-1. MCQ
+MCQ
 <question>
+<question_line_2>
+
 <opt A>
 <opt B>
 <opt C>
 <opt D>
 
-2. AR     
-A: <assertion> 
+
+AR     
+<assertion> 
 <assertion_line_2>
-R: <reason> 
+
+<reason> 
 <reason_line_2>
 
-3. OBJ
-<question>
-<question_line_2>
 
-4. SUB
+SUB
 <question>
-<question_line_2
+<question>

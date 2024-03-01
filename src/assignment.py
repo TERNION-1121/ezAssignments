@@ -6,7 +6,9 @@ from src.utils import *
 class Assignment:
 
     def __init__(self, path: str) -> None:
-
+        """
+        Initialize an Assignment object if `path` represents a valid .txt file
+        """
         assert path.endswith(".txt"), "File must be of .txt format"
         try:
             file = open(path)
@@ -48,17 +50,23 @@ class Assignment:
 
 
     def InitDoc(self):
+        """
+        Basic initializations for the .docx file
+        """
         self.doc.add_heading("Assignment", level=0)
         self.doc.save("assignment.docx")
     
 
     def AddMCQS(self):
+        """
+        Add the valid Multiple Choice Questions to the .docx file
+        """
         self.doc.add_heading("Multiple Choice Questions", level=1)
-
+        self.doc.add_paragraph()
         for mcq in self.QUESTIONS["MCQS"]:
             # add statement
             statement = ' '.join(mcq.question)
-            self.doc.add_paragraph(statement)
+            self.doc.add_paragraph(statement, style="List Number")
             # add choices
             for opt in mcq.options:
                 self.doc.add_paragraph(f"{opt}: {mcq.options[opt]}", style="List 2")
@@ -69,11 +77,14 @@ class Assignment:
 
 
     def AddARS(self):
+        """
+        Add the valid Assertion Reasoning Questions to the .docx file
+        """
         self.doc.add_heading("Assertion and Reasoning", level=1)
         # add instruction
         instruction = self.doc.add_paragraph()
-        instruction.add_run("Using the given option choices, choose the most suitable one ")
-        instruction.add_run("to answer the following questions.")
+        instruction.add_run("The following questions consist of two statements- Assertion (A) and Reasoning (R)\n")
+        instruction.add_run("Answer these questions selecting the most appropriate option given below:")
         # add choices
         for opt in AR.OPTIONS:
             self.doc.add_paragraph(f"{opt}: {AR.OPTIONS[opt]}", style="List 2")
@@ -83,19 +94,26 @@ class Assignment:
             # add statements
             assertion = ' '.join(ar.assertion)
             reason = ' '.join(ar.reason)
-            self.doc.add_paragraph("Assertion (A): ").add_run(assertion)
-            self.doc.add_paragraph("Reason (R): ").add_run(reason)
+            paragraph = self.doc.add_paragraph(style="List Number")
+            paragraph.add_run("Assertion (A): ").bold = True
+            paragraph.add_run(assertion)
+            paragraph = self.doc.add_paragraph(style="List 2")
+            paragraph.add_run("Reason (R): ").bold = True
+            paragraph.add_run(reason)
             self.doc.add_paragraph()
 
         self.doc.save("assignment.docx")
 
 
     def AddSUBS(self):
+        """
+        Add the valid Subjective Questions to the .docx file
+        """
         self.doc.add_heading("Subjective Questions", level=1)
         # add statement
         for sub in self.QUESTIONS["SUBS"]:
             statement = ' '.join(sub.question)
-            self.doc.add_paragraph(statement)
+            self.doc.add_paragraph(statement, style="List Number")
             self.doc.add_paragraph()
         
         self.doc.save("assignment.docx")

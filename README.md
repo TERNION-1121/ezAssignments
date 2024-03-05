@@ -2,8 +2,6 @@
 
 A project to simplify assignment-making tasks at school level.
 
-If you wish to add new questions for your own usage purposes, follow the convention used to write the original `assignment.txt`
-
 ### Convention to write `.txt` files for assignments
 `<QUESTION_CODE>: MCQ, AR, SUB`
 
@@ -57,6 +55,11 @@ since it has no valid question tag before it.
 
 ```
 
+<br>
+
+![image](https://github.com/TERNION-1121/ezAssignments/assets/97667653/1ce59e3c-e5f5-4964-bff3-3be6bdeacf2f)
+
+> Result document
 
 ### How to Run
 

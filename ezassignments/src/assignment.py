@@ -1,22 +1,24 @@
 import docx
 
-from src.question_classes import *
-from src.utils import *
+from .question_classes import *
+from .utils import *
+
 
 class Assignment:
-
-    def __init__(self, path: str) -> None:
+    def __init__(self, dir_path: str, txt_name: str, docx_name: str) -> None:
         """
         Initialize an Assignment object if `path` represents a valid .txt file
         """
-        assert path.endswith(".txt"), "File must be of .txt format"
+        file_path = f"{dir_path}/{txt_name}.txt"
         try:
-            file = open(path)
+            file = open(file_path, 'rt')
+            self.docx_path = f"{dir_path}/{docx_name}.docx"
+
         except FileNotFoundError:
-            print(f"File {path} was not found.")
+            print(f"File {file_path} was not found.")
             return
         
-        # strip whitespaces from the line if it is not a newline
+        # strip whitespaces from each line if not a newline itself
         contents = [line.strip('\n').strip() if line != '\n' else '\n' for line in file]
         file.close()
 
@@ -24,10 +26,10 @@ class Assignment:
         start = 0
         while contents[start] == '\n':
             start += 1
-        
         end = len(contents) - 1
         while contents[end] == '\n':
-            end -=1
+            end -= 1
+
         # split the questions
         contents = split_contents(contents[start:end+1])
         # stores the questions as class objects
@@ -38,9 +40,9 @@ class Assignment:
             match question[0]:
 
                 case 'MCQ':
-                    self.QUESTIONS["MCQS"].append(MCQ.FromListContent(question[1:]))
+                    self.QUESTIONS["MCQS"].append(MCQ.from_list_content(question[1:]))
                 case 'AR':
-                    self.QUESTIONS["ARS"].append(AR.FromListContent(question[1:]))
+                    self.QUESTIONS["ARS"].append(AR.from_list_content(question[1:]))
                 case 'SUB':
                     self.QUESTIONS["SUBS"].append(SUB(question[1:]))
                 case _:
@@ -48,16 +50,14 @@ class Assignment:
         
         self.doc = docx.Document()
 
-
-    def InitDoc(self):
+    def init_doc(self):
         """
         Basic initializations for the .docx file
         """
         self.doc.add_heading("Assignment", level=0)
-        self.doc.save("assignment.docx")
-    
+        self.doc.save(self.docx_path)
 
-    def AddMCQS(self):
+    def add_MCQS(self):
         """
         Add the valid Multiple Choice Questions to the .docx file
         """
@@ -73,10 +73,9 @@ class Assignment:
             # newline
             self.doc.add_paragraph()
 
-        self.doc.save("assignment.docx")
+        self.doc.save(self.docx_path)
 
-
-    def AddARS(self):
+    def add_ARS(self):
         """
         Add the valid Assertion Reasoning Questions to the .docx file
         """
@@ -88,24 +87,25 @@ class Assignment:
         # add choices
         for opt in AR.OPTIONS:
             self.doc.add_paragraph(f"{opt}: {AR.OPTIONS[opt]}", style="List 2")
-        self.doc.add_paragraph() # newline
+        self.doc.add_paragraph()  # newline
 
         for ar in self.QUESTIONS["ARS"]:
             # add statements
             assertion = ' '.join(ar.assertion)
             reason = ' '.join(ar.reason)
+
             paragraph = self.doc.add_paragraph(style="List Number")
             paragraph.add_run("Assertion (A): ").bold = True
             paragraph.add_run(assertion)
+
             paragraph = self.doc.add_paragraph(style="List 2")
             paragraph.add_run("Reason (R): ").bold = True
             paragraph.add_run(reason)
-            self.doc.add_paragraph()
+            paragraph.add_run('\n')
 
-        self.doc.save("assignment.docx")
+        self.doc.save(self.docx_path)
 
-
-    def AddSUBS(self):
+    def add_SUBS(self):
         """
         Add the valid Subjective Questions to the .docx file
         """
@@ -113,7 +113,6 @@ class Assignment:
         # add statement
         for sub in self.QUESTIONS["SUBS"]:
             statement = ' '.join(sub.question)
-            self.doc.add_paragraph(statement, style="List Number")
-            self.doc.add_paragraph()
+            self.doc.add_paragraph(statement, style="List Number").add_run('\n')
         
-        self.doc.save("assignment.docx")
+        self.doc.save(self.docx_path)

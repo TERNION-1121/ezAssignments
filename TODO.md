@@ -1,2 +1,1 @@
-- Add functionality for paragraph spacing (before and after)
-- Add functionality to add subtitle
+- Add optional subheading functionality

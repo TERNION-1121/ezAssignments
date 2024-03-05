@@ -1,0 +1,29 @@
+MCQ
+Question 
+spanning over
+multiple lines
+
+Option A..
+Option B..
+Option C..
+Option D..
+
+
+AR
+Assertion spanning 
+over multiple lines
+
+Notice the newline between the assertion
+and the reason statement
+
+
+SUB
+A subjective question
+that spans over multiple lines.
+Pretty simple to write these,
+Right?
+
+
+P.S.
+This question is invalid,
+since it has no valid question tag before it.

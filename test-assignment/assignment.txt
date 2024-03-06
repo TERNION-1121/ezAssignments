@@ -3,10 +3,10 @@ Question
 spanning over
 multiple lines
 
-Option A..
-Option B..
-Option C..
-Option D..
+Option A.. some text
+Option B.. some text
+Option C.. some text
+Option D.. some text
 
 
 AR
@@ -27,3 +27,15 @@ Right?
 P.S.
 This question is invalid,
 since it has no valid question tag before it.
+
+
+MCQ
+This is
+an invalid question
+too.
+
+
+AR
+This is an
+invalid question
+too.

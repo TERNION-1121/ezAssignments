@@ -7,7 +7,7 @@ from .utils import *
 class Assignment:
     def __init__(self, dir_path: str, txt_name: str, docx_name: str) -> None:
         """
-        Initialize an Assignment object if `path` represents a valid .txt file
+        Initialize an Assignment object if `txt_name.txt` is found in the directory given at `dir_path`
         """
         file_path = f"{dir_path}/{txt_name}.txt"
         try:
@@ -33,21 +33,20 @@ class Assignment:
         # split the questions
         contents = split_contents(contents[start:end+1])
         # stores the questions as class objects
-        self.QUESTIONS = {"MCQS": [], "ARS": [], "SUBS": [], "INVALIDATED": []}
+        self.QUESTIONS = {MCQ: [], AR: [], SUB: [], "INVALIDATED": []}
         # process each question
         for question in contents:
-
             match question[0]:
 
                 case 'MCQ':
-                    self.QUESTIONS["MCQS"].append(MCQ.from_list_content(question[1:]))
+                    self.QUESTIONS[MCQ].append(MCQ.from_list_content(question[1:]))
                 case 'AR':
-                    self.QUESTIONS["ARS"].append(AR.from_list_content(question[1:]))
+                    self.QUESTIONS[AR].append(AR.from_list_content(question[1:]))
                 case 'SUB':
-                    self.QUESTIONS["SUBS"].append(SUB(question[1:]))
+                    self.QUESTIONS[SUB].append(SUB(question[1:]))
                 case _:
                     self.QUESTIONS["INVALIDATED"].append(question)
-        
+
         self.doc = docx.Document()
 
     def init_doc(self):
@@ -62,8 +61,10 @@ class Assignment:
         Add the valid Multiple Choice Questions to the .docx file
         """
         self.doc.add_heading("Multiple Choice Questions", level=1)
-        self.doc.add_paragraph()
-        for mcq in self.QUESTIONS["MCQS"]:
+        # add instruction
+        MCQ.write_instructions(self.doc)
+        # add MCQ questions
+        for mcq in self.QUESTIONS[MCQ]:
             # add statement
             statement = ' '.join(mcq.question)
             self.doc.add_paragraph(statement, style="List Number")
@@ -81,15 +82,13 @@ class Assignment:
         """
         self.doc.add_heading("Assertion and Reasoning", level=1)
         # add instruction
-        instruction = self.doc.add_paragraph()
-        instruction.add_run("The following questions consist of two statements- Assertion (A) and Reasoning (R)\n")
-        instruction.add_run("Answer these questions selecting the most appropriate option given below:")
+        AR.write_instructions(self.doc)
         # add choices
         for opt in AR.OPTIONS:
             self.doc.add_paragraph(f"{opt}: {AR.OPTIONS[opt]}", style="List 2")
         self.doc.add_paragraph()  # newline
 
-        for ar in self.QUESTIONS["ARS"]:
+        for ar in self.QUESTIONS[AR]:
             # add statements
             assertion = ' '.join(ar.assertion)
             reason = ' '.join(ar.reason)
@@ -110,8 +109,10 @@ class Assignment:
         Add the valid Subjective Questions to the .docx file
         """
         self.doc.add_heading("Subjective Questions", level=1)
+        # add instructions
+        SUB.write_instructions(self.doc)
         # add statement
-        for sub in self.QUESTIONS["SUBS"]:
+        for sub in self.QUESTIONS[SUB]:
             statement = ' '.join(sub.question)
             self.doc.add_paragraph(statement, style="List Number").add_run('\n')
         

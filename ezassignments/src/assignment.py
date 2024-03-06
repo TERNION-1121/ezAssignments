@@ -1,4 +1,4 @@
-import docx
+from docx import Document
 
 from .question_classes import *
 from .utils import *
@@ -32,22 +32,23 @@ class Assignment:
 
         # split the questions
         contents = split_contents(contents[start:end+1])
-        # stores the questions as class objects
-        self.QUESTIONS = {MCQ: [], AR: [], SUB: [], "INVALIDATED": []}
+        # store the question classes
+        self.QUESTION_CLS = (MCQ, AR, SUB)
+
         # process each question
         for question in contents:
-            match question[0]:
+            tag = question[0]  # type of question as in input
+            for q_cls in self.QUESTION_CLS:  # each question class
+                if q_cls.__name__ != tag:
+                    continue
+                # tag matches a question class
+                if not q_cls.from_list_content(question[1:]):  # question did not fit the given question type
+                    Invalid(question)  # add question to the Invalid class
+                break
+            else:  # question had no valid question type as tag
+                Invalid(question)
 
-                case 'MCQ':
-                    self.QUESTIONS[MCQ].append(MCQ.from_list_content(question[1:]))
-                case 'AR':
-                    self.QUESTIONS[AR].append(AR.from_list_content(question[1:]))
-                case 'SUB':
-                    self.QUESTIONS[SUB].append(SUB(question[1:]))
-                case _:
-                    self.QUESTIONS["INVALIDATED"].append(question)
-
-        self.doc = docx.Document()
+        self.doc = Document()
 
     def init_doc(self):
         """
@@ -64,7 +65,7 @@ class Assignment:
         # add instruction
         MCQ.write_instructions(self.doc)
         # add MCQ questions
-        for mcq in self.QUESTIONS[MCQ]:
+        for mcq in MCQ.QUESTIONS:
             # add statement
             statement = ' '.join(mcq.question)
             self.doc.add_paragraph(statement, style="List Number")
@@ -88,7 +89,7 @@ class Assignment:
             self.doc.add_paragraph(f"{opt}: {AR.OPTIONS[opt]}", style="List 2")
         self.doc.add_paragraph()  # newline
 
-        for ar in self.QUESTIONS[AR]:
+        for ar in AR.QUESTIONS:
             # add statements
             assertion = ' '.join(ar.assertion)
             reason = ' '.join(ar.reason)
@@ -112,7 +113,7 @@ class Assignment:
         # add instructions
         SUB.write_instructions(self.doc)
         # add statement
-        for sub in self.QUESTIONS[SUB]:
+        for sub in SUB.QUESTIONS:
             statement = ' '.join(sub.question)
             self.doc.add_paragraph(statement, style="List Number").add_run('\n')
         

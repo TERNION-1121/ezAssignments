@@ -1,11 +1,14 @@
-import docx
+from docx import Document
 
 
 class Question:
+    QUESTIONS = list()
     INSTRUCTIONS = None
 
-    def __init__(self, question: list[str] | None) -> None:
+    def __init__(self, question: list[str] | None = None) -> None:
         self.question = question
+        # add to class attribute QUESTIONS
+        self.QUESTIONS.append(self)
 
     @classmethod
     def process_instructions(cls) -> None:
@@ -15,15 +18,15 @@ class Question:
         yes_opts = ('y', 'yes')
         no_opts = ('n', 'no')
         choice = None
-
+        # ask choice
         while choice not in yes_opts + no_opts:
             print(f"Add instructions for {cls.__name__}? (y/n):", end=" ")
             choice = input().strip().lower()
-
+        # quit if user denies for any instruction
         if choice in no_opts:
             cls.INSTRUCTIONS = None
             return
-
+        # ask to use default instructions, if any
         if cls.INSTRUCTIONS is not None:
             print(f"Default instructions for {cls.__name__}:")
             print(''.join(cls.INSTRUCTIONS))
@@ -34,15 +37,16 @@ class Question:
                 choice = input().strip().lower()
 
             if choice in yes_opts:
+                print()
                 return
-
+        # ask user's own instructions
         print("Write your instructions (enter a blank newline to stop giving input):")
         cls.INSTRUCTIONS = list()
         while inp := input().strip():
             cls.INSTRUCTIONS.append(f"{inp}\n")
 
     @classmethod
-    def write_instructions(cls, doc: docx.Document) -> None:
+    def write_instructions(cls, doc: Document) -> None:
         if not cls.INSTRUCTIONS:
             return
 
@@ -51,7 +55,17 @@ class Question:
             instruction.add_run(line)
 
 
+class Invalid:
+    QUESTIONS = list()
+
+    def __init__(self, question: list[str] | None = None) -> None:
+        self.statement = [line + '\n' for line in question]
+
+        Invalid.QUESTIONS.append(self)
+
+
 class MCQ(Question):
+    QUESTIONS = list()
     INSTRUCTIONS = None
 
     def __init__(self,
@@ -65,7 +79,7 @@ class MCQ(Question):
         super(MCQ, cls).process_instructions()
 
     @classmethod
-    def write_instructions(cls, doc: docx.Document) -> None:
+    def write_instructions(cls, doc: Document) -> None:
         super(MCQ, cls).write_instructions(doc)
 
     @classmethod
@@ -76,8 +90,14 @@ class MCQ(Question):
             if line == '\n':
                 break
             question.append(line)
+        else:  # no newline was encountered to distinguish question statement from options
+            return None
         # store options
-        options = dict(zip(['A', 'B', 'C', 'D'], content[-4:]))
+        opt_statements = content[-4:]
+        if len(opt_statements) != 4:  # correct number of options were not supplied
+            return None
+        # TODO: check for empty lines in opt_statements
+        options = dict(zip(['A', 'B', 'C', 'D'], opt_statements))
 
         return cls(question, options)
 
@@ -86,6 +106,7 @@ class MCQ(Question):
 
 
 class AR(Question):
+    QUESTIONS = list()
     INSTRUCTIONS = ["The following questions consist of two statements- Assertion (A) and Reasoning (R)\n",
                     "Answer these questions selecting the most appropriate option given below:"]
     OPTIONS = {'A': "Both Assertion (A) and Reason (R) are True, and R is the correct explanation of A.",
@@ -98,7 +119,7 @@ class AR(Question):
     def __init__(self,
                  assertion: list[str],
                  reason: list[str]) -> None:
-        super().__init__(None)
+        super().__init__()
         self.assertion = assertion
         self.reason = reason
 
@@ -107,14 +128,14 @@ class AR(Question):
         super(AR, cls).process_instructions()
 
     @classmethod
-    def write_instructions(cls, doc: docx.Document) -> None:
+    def write_instructions(cls, doc: Document) -> None:
         super(AR, cls).write_instructions(doc)
 
     @classmethod
     def from_list_content(cls, content: list[str]):
         try:
             sep_index = content.index('\n')
-        except ValueError:
+        except ValueError:  # no newline was found to distinguish assertion from reasoning statement
             return None
 
         assertion = content[:sep_index]
@@ -127,6 +148,7 @@ class AR(Question):
 
 
 class SUB(Question):
+    QUESTIONS = list()
     INSTRUCTIONS = None
 
     def __init__(self, question: list[str]) -> None:
@@ -137,8 +159,12 @@ class SUB(Question):
         super(SUB, cls).process_instructions()
 
     @classmethod
-    def write_instructions(cls, doc: docx.Document) -> None:
+    def write_instructions(cls, doc: Document) -> None:
         super(SUB, cls).write_instructions(doc)
+
+    @classmethod
+    def from_list_content(cls, content: list[str]):
+        return cls(content)
 
     def __repr__(self) -> str:
         return f"""SUB({self.question[0][:10]}...{self.question[-1][-10:]})"""

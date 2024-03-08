@@ -14,14 +14,15 @@ def main():
                         help="full path to the directory (with assets) to process")
     parser.add_argument("txtname",
                         metavar="TEXT_FILE_NAME",
-                        help="name of the .txt file")
+                        help="name of the .txt file (including extension)")
     parser.add_argument("-o", "--docname",
                         metavar="DOCX_FILE_NAME",
-                        help="name of the .docx file (default: assignment)",
-                        default="assignment")
+                        help="name of the .docx file (including extension; default: assignment.docx)",
+                        default="assignment.docx")
     args = parser.parse_args()
 
     assignment_doc = Assignment(args.dir_path, args.txtname, args.docname)
+    assignment_doc.process_title()
 
     # ask for optional instructions for each question type
     for q_type in assignment_doc.QUESTION_CLS:

@@ -13,15 +13,15 @@ class Question:
     @classmethod
     def process_instructions(cls) -> None:
         """
-        Prompt the user to process optional instructions in the main program
+        Ask the user to process optional instructions in the main program
         """
         yes_opts = ('y', 'yes')
         no_opts = ('n', 'no')
-        choice = None
         # ask choice
-        while choice not in yes_opts + no_opts:
+        print(f"Add instructions for {cls.__name__}? (y/n):", end=" ")
+        while (choice := input().strip().lower()) not in yes_opts + no_opts:
+            print("\033[1A\033[0J", end='')
             print(f"Add instructions for {cls.__name__}? (y/n):", end=" ")
-            choice = input().strip().lower()
         # quit if user denies for any instruction
         if choice in no_opts:
             cls.INSTRUCTIONS = None
@@ -31,10 +31,10 @@ class Question:
             print(f"Default instructions for {cls.__name__}:")
             print(''.join(cls.INSTRUCTIONS))
 
-            choice = None
-            while choice not in yes_opts + no_opts:
+            print("Continue with default instructions? (y/n):", end=" ")
+            while (choice := input().strip().lower()) not in yes_opts + no_opts:
+                print("\033[1A\033[0J", end='')
                 print("Continue with default instructions? (y/n):", end=" ")
-                choice = input().strip().lower()
 
             if choice in yes_opts:
                 print()

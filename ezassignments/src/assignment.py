@@ -1,5 +1,7 @@
 from docx import Document
 
+from os.path import join
+
 from .question_classes import *
 from .utils import *
 
@@ -9,10 +11,10 @@ class Assignment:
         """
         Initialize an Assignment object if `txt_name.txt` is found in the directory given at `dir_path`
         """
-        file_path = f"{dir_path}/{txt_name}.txt"
+        file_path = join(dir_path, txt_name)
         try:
             file = open(file_path, 'rt')
-            self.docx_path = f"{dir_path}/{docx_name}.docx"
+            self.docx_path = join(dir_path, docx_name)
 
         except FileNotFoundError:
             print(f"File {file_path} was not found.")
@@ -49,12 +51,32 @@ class Assignment:
                 Invalid(question)
 
         self.doc = Document()
+        self.doc_title = "Assignment"
+
+    def process_title(self):
+        yes_opts = ('y', 'yes')
+        no_opts = ('n', 'no')
+        # ask choice
+        print(f"Change document title? [default is {self.doc_title}] (y/n):", end=" ")
+        while (choice := input().strip().lower()) not in yes_opts + no_opts:
+            print("\033[1A\033[0J", end='')
+            # ^ ANSI escape codes reference: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+            print(f"Change document title? [default is {self.doc_title}] (y/n):", end=" ")
+        # user opted for default title
+        if choice in no_opts:
+            return
+        # ask user for title
+        while not (title := input("Write your own document title: ")):
+            print("\033[1A\033[0J", end='')
+
+        print()
+        self.doc_title = title
 
     def init_doc(self):
         """
         Basic initializations for the .docx file
         """
-        self.doc.add_heading("Assignment", level=0)
+        self.doc.add_heading(self.doc_title, level=0)
         self.doc.save(self.docx_path)
 
     def add_MCQS(self):

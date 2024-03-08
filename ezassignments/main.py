@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from os.path import join
 from src import *
 
 
@@ -39,7 +40,7 @@ def main():
     if not Invalid.QUESTIONS:
         return 
     
-    with open(f"{args.dir_path}/invalidated_questions.txt", 'w') as file:
+    with open(join(args.dir_path, 'invalidated.txt'), 'w') as file:
         file.write("THE FOLLOWING QUESTIONS WERE INVALIDATED:\n\n")
         for question in Invalid.QUESTIONS:
             file.writelines(question.statement)

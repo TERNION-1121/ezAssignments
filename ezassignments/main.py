@@ -37,15 +37,21 @@ def main():
         assignment_doc.add_ARS()
     if SUB.QUESTIONS:
         assignment_doc.add_SUBS()
-    if not Invalid.QUESTIONS:
+    if not Invalid.QUESTIONS and not Invalid.IMAGES:
         return 
     
     with open(join(args.dir_path, 'invalidated.txt'), 'w') as file:
-        file.write("THE FOLLOWING QUESTIONS WERE INVALIDATED:\n\n")
-        for question in Invalid.QUESTIONS:
-            file.writelines(question.statement)
-            file.write('\n')
-
+        if Invalid.QUESTIONS:
+            file.write("THE FOLLOWING QUESTIONS WERE INVALIDATED:\n\n")
+            for question in Invalid.QUESTIONS:
+                file.writelines(question.statement)
+                file.write('\n')
+        if Invalid.IMAGES:
+            file.write("THE FOLLOWING IMAGES WERE NOT PRESENT IN THE IMAGE ASSETS, THUS INVALIDATED:\n\n")
+            for img in Invalid.IMAGES:
+                file.write(img.image)
+                file.write('\n')
+        
 
 if __name__ == "__main__":
     main()

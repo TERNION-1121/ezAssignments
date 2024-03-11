@@ -15,6 +15,7 @@ maybe have a method to write the image pointed by the image attr of the question
 
   - Image assets should be stored in the `images` subdirectory of the directory pointed by the `dir_path` command line argument.
 
+  - Latest Update: Image handling works, just review the code once more for more changes
 <br>
 
 - Add new question type: Case Studies

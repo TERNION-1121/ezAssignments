@@ -1,5 +1,7 @@
 from docx import Document
+from docx.shared import Inches
 
+from os import listdir
 from os.path import join
 
 from .question_classes import *
@@ -11,15 +13,16 @@ class Assignment:
         """
         Initialize an Assignment object if `txt_name.txt` is found in the directory given at `dir_path`
         """
-        file_path = join(dir_path, txt_name)
+        self.dir_path = dir_path
+        file_path = join(self.dir_path, txt_name)
         try:
             file = open(file_path, 'rt')
-            self.docx_path = join(dir_path, docx_name)
+            self.docx_path = join(self.dir_path, docx_name)
 
         except FileNotFoundError:
             print(f"File {file_path} was not found.")
             return
-        
+
         # strip whitespaces from each line if not a newline itself
         contents = [line.strip('\n').strip() if line != '\n' else '\n' for line in file]
         file.close()
@@ -45,10 +48,18 @@ class Assignment:
                     continue
                 # tag matches a question class
                 if not q_cls.from_list_content(question[1:]):  # question did not fit the given question type
-                    Invalid(question)  # add question to the Invalid class
+                    Invalid(question=question)  # add question to the Invalid class
                 break
             else:  # question had no valid question type as tag
-                Invalid(question)
+                Invalid(question=question)
+
+        # check for images dir in dir_path
+        path = join(self.dir_path, "images")
+        try:
+            self.image_assets = {f for f in listdir(path)}
+        except FileNotFoundError:
+            print(f"Warning: {path} was not found, image insertion won't be possible.", end="\n\n")
+            self.image_assets = None
 
         self.doc = Document()
         self.doc_title = "Assignment"
@@ -64,6 +75,7 @@ class Assignment:
             print(f"Change document title? [default is {self.doc_title}] (y/n):", end=" ")
         # user opted for default title
         if choice in no_opts:
+            print()
             return
         # ask user for title
         while not (title := input("Write your own document title: ")):
@@ -71,6 +83,21 @@ class Assignment:
 
         print()
         self.doc_title = title
+
+    def attach_image(self, q_obj: Question):
+        if not q_obj:
+            return 
+        if not self.image_assets:
+            Invalid(image=q_obj.image)
+            return 
+        
+        for image in self.image_assets:
+            if image == q_obj.image:
+                self.doc.add_picture(join(self.dir_path, "images", q_obj.image), width=Inches(6))
+                self.doc.save(self.docx_path)
+                break 
+        else:  # image was not found in image_assets; invalidated  
+            Invalid(image=q_obj.image)
 
     def init_doc(self):
         """
@@ -88,6 +115,8 @@ class Assignment:
         MCQ.write_instructions(self.doc)
         # add MCQ questions
         for mcq in MCQ.QUESTIONS:
+            # attach image, if any
+            self.attach_image(mcq)
             # add statement
             statement = ' '.join(mcq.question)
             self.doc.add_paragraph(statement, style="List Number")
@@ -112,6 +141,8 @@ class Assignment:
         self.doc.add_paragraph()  # newline
 
         for ar in AR.QUESTIONS:
+            # attach image, if any
+            self.attach_image(ar)
             # add statements
             assertion = ' '.join(ar.assertion)
             reason = ' '.join(ar.reason)
@@ -134,8 +165,11 @@ class Assignment:
         self.doc.add_heading("Subjective Questions", level=1)
         # add instructions
         SUB.write_instructions(self.doc)
-        # add statement
+        # add statements
         for sub in SUB.QUESTIONS:
+            # attach image, if any
+            self.attach_image(sub)
+
             statement = ' '.join(sub.question)
             self.doc.add_paragraph(statement, style="List Number").add_run('\n')
         

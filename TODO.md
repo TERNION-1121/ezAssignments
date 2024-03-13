@@ -1,4 +1,3 @@
 # TODOS
 
-- Image functionality
-- Add new question type Case Studies
+- Add new question type: Case Studies

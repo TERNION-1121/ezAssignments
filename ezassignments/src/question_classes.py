@@ -1,27 +1,32 @@
 from docx import Document
 
+from os.path import join
 
 class Question:
     QUESTIONS = list()
     INSTRUCTIONS = None
 
-    def __init__(self, question: list[str] | None = None) -> None:
+    def __init__(self,
+                 question: list[str] | None = None,
+                 image: str | None = None) -> None:
         self.question = question
+        self.image = image
         # add to class attribute QUESTIONS
         self.QUESTIONS.append(self)
 
     @classmethod
     def process_instructions(cls) -> None:
         """
-        Prompt the user to process optional instructions in the main program
+        Ask the user to process optional instructions in the main program
         """
         yes_opts = ('y', 'yes')
         no_opts = ('n', 'no')
-        choice = None
         # ask choice
-        while choice not in yes_opts + no_opts:
+        print(f"Add instructions for {cls.__name__}? (y/n):", end=" ")
+        while (choice := input().strip().lower()) not in yes_opts + no_opts:
+            print("\033[1A\033[0J", end='')
             print(f"Add instructions for {cls.__name__}? (y/n):", end=" ")
-            choice = input().strip().lower()
+        print()
         # quit if user denies for any instruction
         if choice in no_opts:
             cls.INSTRUCTIONS = None
@@ -31,10 +36,10 @@ class Question:
             print(f"Default instructions for {cls.__name__}:")
             print(''.join(cls.INSTRUCTIONS))
 
-            choice = None
-            while choice not in yes_opts + no_opts:
+            print("Continue with default instructions? (y/n):", end=" ")
+            while (choice := input().strip().lower()) not in yes_opts + no_opts:
+                print("\033[1A\033[0J", end='')
                 print("Continue with default instructions? (y/n):", end=" ")
-                choice = input().strip().lower()
 
             if choice in yes_opts:
                 print()
@@ -54,14 +59,41 @@ class Question:
         for line in cls.INSTRUCTIONS:
             instruction.add_run(line)
 
+    @staticmethod
+    def process_image_arg(line: str) -> str | None:
+        if not line.startswith('[') or not line.endswith(']'):
+            return None
+        return line.strip("[ ]")
+    
 
 class Invalid:
     QUESTIONS = list()
+    IMAGES = list()
 
-    def __init__(self, question: list[str] | None = None) -> None:
-        self.statement = [line + '\n' for line in question]
+    def __init__(self, 
+                 question: list[str] | None = None,
+                 image: str | None = None) -> None:
+        if question:
+            self.statement = [line + '\n' for line in question]
+            Invalid.QUESTIONS.append(self)
+        elif image:
+            self.image = image 
+            Invalid.IMAGES.append(self)
 
-        Invalid.QUESTIONS.append(self)
+    @classmethod
+    def process_invalidated_objects(cls, dir_path: str):
+        with open(join(dir_path, 'invalidated.txt'), 'w') as file:
+            if Invalid.QUESTIONS:
+                file.write("THE FOLLOWING QUESTIONS WERE INVALIDATED:\n\n")
+                for question in Invalid.QUESTIONS:
+                    file.writelines(question.statement)
+                    file.write('\n')
+
+            if Invalid.IMAGES:
+                file.write("THE FOLLOWING IMAGES WERE NOT PRESENT IN THE IMAGE ASSETS, THUS INVALIDATED:\n\n")
+                for img in Invalid.IMAGES:
+                    file.write(img.image)
+                    file.write('\n')
 
 
 class MCQ(Question):
@@ -70,8 +102,9 @@ class MCQ(Question):
 
     def __init__(self,
                  question: list[str],
-                 options: dict[str:str]) -> None:
-        super().__init__(question)
+                 options: dict[str:str],
+                 image: str | None = None) -> None:
+        super().__init__(question, image)
         self.options = options
 
     @classmethod
@@ -92,14 +125,22 @@ class MCQ(Question):
             question.append(line)
         else:  # no newline was encountered to distinguish question statement from options
             return None
+        
+        # get image name, if provided with any
+        image = cls.process_image_arg(content[-1])
+        # determine slice range
+        s = slice(-4, len(content), 1)
+        if image:
+            s = slice(-5, -1, 1)
+
         # store options
-        opt_statements = content[-4:]
+        opt_statements = content[s]
         if len(opt_statements) != 4:  # correct number of options were not supplied
             return None
         # TODO: check for empty lines in opt_statements
         options = dict(zip(['A', 'B', 'C', 'D'], opt_statements))
 
-        return cls(question, options)
+        return cls(question, options, image)
 
     def __repr__(self) -> str:
         return f"""MCQ({self.question[0][:10]}...{self.question[-1][-10:]})"""
@@ -118,8 +159,9 @@ class AR(Question):
 
     def __init__(self,
                  assertion: list[str],
-                 reason: list[str]) -> None:
-        super().__init__()
+                 reason: list[str],
+                 image: str | None = None) -> None:
+        super().__init__(image=image)
         self.assertion = assertion
         self.reason = reason
 
@@ -139,9 +181,14 @@ class AR(Question):
             return None
 
         assertion = content[:sep_index]
-        reason = content[sep_index + 1:]
 
-        return cls(assertion, reason)
+        image = cls.process_image_arg(content[-1])
+        # determine slice range
+        s = slice(sep_index + 1, len(content) if not image else -1, 1)
+
+        reason = content[s]
+
+        return cls(assertion, reason, image)
 
     def __repr__(self) -> str:
         return f"""AR(A:{self.assertion[0][:10]}...R:{self.reason[0][:10]})"""
@@ -151,8 +198,10 @@ class SUB(Question):
     QUESTIONS = list()
     INSTRUCTIONS = None
 
-    def __init__(self, question: list[str]) -> None:
-        super().__init__(question)
+    def __init__(self,
+                 question: list[str],
+                 image: str | None = None) -> None:
+        super().__init__(question, image)
 
     @classmethod
     def process_instructions(cls) -> None:
@@ -164,7 +213,11 @@ class SUB(Question):
 
     @classmethod
     def from_list_content(cls, content: list[str]):
-        return cls(content)
+        image = cls.process_image_arg(content[-1])
+        # determine slice range
+        s = slice(len(content) if not image else -1)
+
+        return cls(content[s], image)
 
     def __repr__(self) -> str:
         return f"""SUB({self.question[0][:10]}...{self.question[-1][-10:]})"""

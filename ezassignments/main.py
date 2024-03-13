@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from os.path import join
 from src import *
 
 
@@ -14,14 +15,15 @@ def main():
                         help="full path to the directory (with assets) to process")
     parser.add_argument("txtname",
                         metavar="TEXT_FILE_NAME",
-                        help="name of the .txt file")
+                        help="name of the .txt file (including extension)")
     parser.add_argument("-o", "--docname",
                         metavar="DOCX_FILE_NAME",
-                        help="name of the .docx file (default: assignment)",
-                        default="assignment")
+                        help="name of the .docx file (including extension; default: assignment.docx)",
+                        default="assignment.docx")
     args = parser.parse_args()
 
     assignment_doc = Assignment(args.dir_path, args.txtname, args.docname)
+    assignment_doc.process_title()
 
     # ask for optional instructions for each question type
     for q_type in assignment_doc.QUESTION_CLS:
@@ -35,15 +37,11 @@ def main():
         assignment_doc.add_ARS()
     if SUB.QUESTIONS:
         assignment_doc.add_SUBS()
-    if not Invalid.QUESTIONS:
+    if not Invalid.QUESTIONS and not Invalid.IMAGES:
         return 
     
-    with open(f"{args.dir_path}/invalidated_questions.txt", 'w') as file:
-        file.write("THE FOLLOWING QUESTIONS WERE INVALIDATED:\n\n")
-        for question in Invalid.QUESTIONS:
-            file.writelines(question.statement)
-            file.write('\n')
-
+    Invalid.process_invalidated_objects(args.dir_path)
+        
 
 if __name__ == "__main__":
     main()

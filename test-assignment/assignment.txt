@@ -3,10 +3,11 @@ Question
 spanning over
 multiple lines
 
-Option A.. some text
-Option B.. some text
-Option C.. some text
-Option D.. some text
+Option A... some text
+Option B... some text
+Option C... some text
+Option D... some text
+[clouds.jpg]
 
 
 AR

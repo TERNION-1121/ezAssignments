@@ -40,17 +40,7 @@ def main():
     if not Invalid.QUESTIONS and not Invalid.IMAGES:
         return 
     
-    with open(join(args.dir_path, 'invalidated.txt'), 'w') as file:
-        if Invalid.QUESTIONS:
-            file.write("THE FOLLOWING QUESTIONS WERE INVALIDATED:\n\n")
-            for question in Invalid.QUESTIONS:
-                file.writelines(question.statement)
-                file.write('\n')
-        if Invalid.IMAGES:
-            file.write("THE FOLLOWING IMAGES WERE NOT PRESENT IN THE IMAGE ASSETS, THUS INVALIDATED:\n\n")
-            for img in Invalid.IMAGES:
-                file.write(img.image)
-                file.write('\n')
+    Invalid.process_invalidated_objects(args.dir_path)
         
 
 if __name__ == "__main__":

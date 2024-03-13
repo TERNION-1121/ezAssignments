@@ -133,17 +133,16 @@ class Assignment:
         Add the valid Assertion Reasoning Questions to the .docx file
         """
         self.doc.add_heading("Assertion and Reasoning", level=1)
-        # add instruction
+
         AR.write_instructions(self.doc)
-        # add choices
+
         for opt in AR.OPTIONS:
             self.doc.add_paragraph(f"{opt}: {AR.OPTIONS[opt]}", style="List 2")
-        self.doc.add_paragraph()  # newline
+        self.doc.add_paragraph()
 
         for ar in AR.QUESTIONS:
-            # attach image, if any
             self.attach_image(ar)
-            # add statements
+
             assertion = ' '.join(ar.assertion)
             reason = ' '.join(ar.reason)
 
@@ -163,11 +162,10 @@ class Assignment:
         Add the valid Subjective Questions to the .docx file
         """
         self.doc.add_heading("Subjective Questions", level=1)
-        # add instructions
+
         SUB.write_instructions(self.doc)
-        # add statements
+
         for sub in SUB.QUESTIONS:
-            # attach image, if any
             self.attach_image(sub)
 
             statement = ' '.join(sub.question)

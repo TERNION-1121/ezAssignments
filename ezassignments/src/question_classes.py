@@ -1,5 +1,6 @@
 from docx import Document
 
+from os.path import join
 
 class Question:
     QUESTIONS = list()
@@ -78,6 +79,21 @@ class Invalid:
         elif image:
             self.image = image 
             Invalid.IMAGES.append(self)
+
+    @classmethod
+    def process_invalidated_objects(cls, dir_path: str):
+        with open(join(dir_path, 'invalidated.txt'), 'w') as file:
+            if Invalid.QUESTIONS:
+                file.write("THE FOLLOWING QUESTIONS WERE INVALIDATED:\n\n")
+                for question in Invalid.QUESTIONS:
+                    file.writelines(question.statement)
+                    file.write('\n')
+
+            if Invalid.IMAGES:
+                file.write("THE FOLLOWING IMAGES WERE NOT PRESENT IN THE IMAGE ASSETS, THUS INVALIDATED:\n\n")
+                for img in Invalid.IMAGES:
+                    file.write(img.image)
+                    file.write('\n')
 
 
 class MCQ(Question):

@@ -7,6 +7,12 @@ A project to simplify assignment-making tasks at school level.
 
 Questions are separated by two newline characters.
 
+In order to add images, create an `images` subdirectory in the provided directory path
+and have your image assets there. Then, if you wish to add an image before any question, 
+use the following syntax after the whole question text (in a newline) to add one, `[image_name.extension]`
+
+Remember if you don't wish to add an image, just proceed as usual without using that line of text.
+
 Follow the given snippet to write your assignments.
 
 ```commandline
@@ -14,6 +20,7 @@ MCQ
 Question 
 spanning over
 multiple lines
+[image_name.extension]
 
 Option A..
 Option B..
@@ -27,6 +34,7 @@ over multiple lines
 
 Notice the newline between the assertion
 and the reason statement
+[image_name.extension]
 
 
 SUB
@@ -34,6 +42,7 @@ A subjective question
 that spans over multiple lines.
 Pretty simple to write these,
 Right?
+[image_name.extension]
 
 
 P.S.
@@ -43,7 +52,7 @@ since it has no valid question tag before it.
 
 Although here the question statement spans over multiple lines, it won't be the case with the actual assignment document.
 
-Invalidated questions are saved in `invalidated_questions.txt`
+Information about invalidated questions and images is saved in `invalidated.txt`
 
 ```commandline
 THE FOLLOWING QUESTIONS WERE INVALIDATED:
@@ -67,20 +76,20 @@ since it has no valid question tag before it.
 `~/ezAssignments/ezassignments`
 2. Run: `python main.py`
 ```commandline
-usage: main.py [-h] [-o DOCX_FILE_NAME] dir_path TEXT_FILE_NAME
+usage: main.py [-h] [-o DOCX_FILE_NAME] DIR_PATH TEXT_FILE_NAME
 
 A tool to simplify the assignment making process at school level. 
 Write the questions using the conventions as per the documentation, 
-and get the assignment as a formatted .docx file.
+and get the assignment as a formatted .docx file.     
 
 positional arguments:
-  dir_path              full path to the directory (with assets) to process
-  TEXT_FILE_NAME        name of the .txt file
+  DIR_PATH              full path to the directory (with assets) to process
+  TEXT_FILE_NAME        name of the .txt file (including extension)
 
 options:
   -h, --help            show this help message and exit
-  -o DOCX_FILE_NAME, --docxname DOCX_FILE_NAME
-                        name of the .docx file (default: assignment)
+  -o DOCX_FILE_NAME, --docname DOCX_FILE_NAME
+                        name of the .docx file (including extension; default: assignment.docx)
 ```
 
 3. Follow the usage instructions to use the program.
